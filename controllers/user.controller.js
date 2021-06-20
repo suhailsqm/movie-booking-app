@@ -18,17 +18,18 @@ exports.signUp = (req, res) => {
   const filter = { email: email };
   User.findOne(filter, (err, user) => {
     if (err || user === null) {
-      const salt = bcrypt.genSaltSync(10);
-      const hash = bcrypt.hashSync(req.body.password, salt);
+    //   const salt = bcrypt.genSaltSync(10);
+    //   const hash = bcrypt.hashSync(req.body.password, salt);
 
       
-      console.log(hash);
+    //   console.log(hash);
 
       const user = new User({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         email: email,
-        password: hash,
+        // password: hash,
+        password: req.body.password,
         role: req.body.role ? req.body.role : "user",
         isLoggedIn: true,
       });
@@ -69,11 +70,13 @@ exports.login = (req, res) => {
         message: "Email or password not correct.",
       });
     } else {
-      console.log(bcrypt.compareSync(password, user.password));
+    //   console.log(bcrypt.compareSync(password, user.password));
 
-      if (bcrypt.compareSync(password, user.password)) {
+    //   if (bcrypt.compareSync(password, user.password)) {
+        if (user.password === password) {
         user.isLoggedIn = true;
-
+        const token = jwt.sign({ _id: user._id }, "myprivatekey");
+        user.accesstoken = token;
         User.findOneAndUpdate(filter, user, { useFindAndModify: false })
           .then((data) => {
             if (!data) {
@@ -81,9 +84,9 @@ exports.login = (req, res) => {
                 message: "Some error occurred, please try again later.",
               });
             } else {
-              const token = jwt.sign({ _id: data._id }, "myprivatekey");
-              data.accesstoken = token;
-              console.log(data)
+            //   const token = jwt.sign({ _id: data._id }, "myprivatekey");
+            //   data.accesstoken = token;
+            //   console.log(data)
               res.send(data);
             }
           })
@@ -108,7 +111,7 @@ exports.logout = (req, res) => {
   }
 
   const id = req.body.id;
-  const update = { isLoggedIn: false };
+  const update = { isLoggedIn: false, accesstoken: "" };
 
   User.findByIdAndUpdate(id, update)
     .then((data) => {
@@ -124,3 +127,48 @@ exports.logout = (req, res) => {
       });
     });
 };
+exports.getCouponCode = async (req, res) => {
+    // if (!req.body.coupens) {
+    //   res.status(400).send({ message: "Please provide a valid Coupon." });
+    //   return;
+    // }
+  
+    // const coupens = req.body.coupens;
+  
+    // User.findByCoupons(coupens, update)
+    //   .then((data) => {
+    //     if (!data) {
+    //       res.status(404).send({
+    //         message: "Some error occurred, please try again later.",
+    //       });
+    //     } else res.send({ message: "Coupen Passed Succesfully" });
+    //   })
+    //   .catch((err) => {
+    //     res.status(500).send({
+    //       message: "Error updating.",
+    //     });
+    //   });
+    console.log("Start fatching coupones")
+    const token = req.headers["x-access-token"] || req.headers["authorization"];
+    console.log(token)
+    User.find({accesstoken: token}).then(function(user){
+        if(user[0].coupens)
+            res.send(user[0].coupens);
+        else
+            res.send([])
+    });
+   
+  };
+
+
+  exports.bookShow = (req, res) => {
+    const token = req.headers["x-access-token"] || req.headers["authorization"];
+    console.log(token)
+    User.find({accesstoken: token}).then(function(user){
+        if(user[0].bookingRequests)
+            res.send(user[0].bookingRequests);
+        else
+            res.send([])
+    });
+   
+  };

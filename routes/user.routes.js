@@ -11,6 +11,10 @@ module.exports = app => {
     router.post("/sign-up", users.signUp);
 
     router.post("/logout", auth, users.logout);
+
+    router.get("/getCouponCode", auth, users.getCouponCode);
+
+    router.get("/bookShow", auth, users.bookShow);
   
     app.use('/api', router);
   };
