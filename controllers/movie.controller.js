@@ -38,20 +38,20 @@ async function findAllMovies(req,res){
 
 async function findOne(req,res){
     const id = req.params.movieId;
-    const data =await db.movies.find({"movieid": id});
-    console.log(id);
+    const data =await db.movies.find({movieid: id});
+    console.log({movieid: id});
     console.log(data);
     if(!data){
         res.status(404).send({ message: "Not found movie with id " + id });
     }
-    res.json(data);
+    res.json({movieid: id});
 
 }
 
 async function findShows(req,res){
 
     const id=req.params.movieId;
-    const show=await db.movies.findById(id).shows;
+    const show=await db.movies.findById({movieid: id}).shows;
 
     if(!show  || shows.length === 0){
         res.status(404).send({ message: "Not found shows with id " + id });

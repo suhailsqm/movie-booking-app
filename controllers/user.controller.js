@@ -1,6 +1,7 @@
 const db = require("../models");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+//const bcrypt = require("bcrypt");
+const {atob,btoa}=require("b2a");
 
 const User = db.users;
 
@@ -55,6 +56,9 @@ exports.signUp = (req, res) => {
 exports.login = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const authHeader = req.headers.authorization.split(" ")[1];
+  const uname=unamePwd.split(":")[0];
+  const pwd =unamePwd.split(":")[1];
 
   if (!email && !password) {
     res
